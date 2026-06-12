@@ -52,6 +52,11 @@ const menuItems: MenuItemData[] = [
     id: "transitions",
     label: "Transitions",
     icon: Icons.transition
+  },
+  {
+    id: "ai-video",
+    label: "AI Video",
+    icon: Icons.aiVideo
   }
 ];
 

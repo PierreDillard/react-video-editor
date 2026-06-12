@@ -15,6 +15,7 @@ import Brightness from "./common/brightness";
 import useLayoutStore from "../store/use-layout-store";
 import { Label } from "@/components/ui/label";
 import { Animations } from "./common/animations";
+import TransformToVideo from "./common/transform-to-video";
 
 const BasicImage = ({
   trackItem,
@@ -178,6 +179,17 @@ const BasicImage = ({
   };
 
   const components = [
+    {
+      key: "ai-video",
+      component: (
+        <div className="flex flex-col gap-2">
+          <Label className="font-sans text-xs font-semibold">AI</Label>
+          <div className="mb-2">
+            <TransformToVideo trackItem={trackItem} />
+          </div>
+        </div>
+      )
+    },
     {
       key: "crop",
       component: (

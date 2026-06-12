@@ -71,6 +71,7 @@ export const Icons = {
   chevronRight: ChevronRight,
   check: Check,
   sfx: AudioWaveform,
+  aiVideo: Sparkles,
   circleFilled: ({ ...props }: LucideProps) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"

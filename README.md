@@ -40,7 +40,20 @@ Create a `.env` file in the project root and add the following:
 
 ```env
 PEXELS_API_KEY=""
+FAL_KEY=""
 ```
+
+`FAL_KEY` is required to generate AI videos from the editor. To configure it:
+
+1. Create or log in to your fal.ai account.
+2. Generate an API key from your fal.ai dashboard.
+3. Paste the key in `.env`:
+
+```env
+FAL_KEY="your_fal_api_key"
+```
+
+Restart the development server after changing `.env` so Next.js can load the new value.
 
 Clone locally:
 

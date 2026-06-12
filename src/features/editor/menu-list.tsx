@@ -68,6 +68,12 @@ const MENU_ITEMS = [
     ariaLabel: "Generate AI voice from text"
   },
   {
+    id: "ai-video",
+    icon: Icons.aiVideo,
+    label: "AI Video",
+    ariaLabel: "Generate AI videos from images or text"
+  },
+  {
     id: "sfx",
     icon: Icons.sfx,
     label: "SFX",

@@ -10,6 +10,7 @@ import { VoiceOver } from "./voice-over";
 import { useIsLargeScreen } from "@/hooks/use-media-query";
 import { Uploads } from "./uploads";
 import { AiVoice } from "./ai-voice";
+import { AiVideo } from "./ai-video";
 import { SFX } from "./sfx";
 
 const ActiveMenuItem = () => {
@@ -51,6 +52,10 @@ const ActiveMenuItem = () => {
 
   if (activeMenuItem === "ai-voice") {
     return <AiVoice />;
+  }
+
+  if (activeMenuItem === "ai-video") {
+    return <AiVideo />;
   }
 
   if (activeMenuItem === "sfx") {

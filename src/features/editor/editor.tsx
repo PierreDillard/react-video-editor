@@ -3,6 +3,7 @@ import Timeline from "./timeline";
 import useStore from "./store/use-store";
 import Navbar from "./navbar";
 import useTimelineEvents from "./hooks/use-timeline-events";
+import useAiVideoPolling from "./hooks/use-ai-video-polling";
 import Scene from "./scene";
 import { SceneRef } from "./scene/scene.types";
 import StateManager, { DESIGN_LOAD } from "@designcombo/state";
@@ -97,6 +98,7 @@ const Editor = ({ tempId, id }: { tempId?: string; id?: string }) => {
   const isLargeScreen = useIsLargeScreen();
 
   useTimelineEvents();
+  useAiVideoPolling();
 
   const { setCompactFonts, setFonts } = useDataState();
   // useEffect(() => {
