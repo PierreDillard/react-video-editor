@@ -24,6 +24,7 @@ export const AI_VIDEO_MODELS: AiVideoModel[] = [
 		id: "pixverse-v4.5",
 		name: "PixVerse v4.5",
 		endpoints: {
+			"text-to-video": "fal-ai/pixverse/v4.5/text-to-video",
 			"image-to-video": "fal-ai/pixverse/v4.5/image-to-video"
 		},
 		pricePerSecond: 0.04,

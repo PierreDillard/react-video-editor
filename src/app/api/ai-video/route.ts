@@ -71,7 +71,11 @@ export async function POST(request: Request) {
 		}
 
 		const data = await falResponse.json();
-		return NextResponse.json({ requestId: data.request_id });
+		return NextResponse.json({
+			requestId: data.request_id,
+			statusUrl: data.status_url,
+			responseUrl: data.response_url
+		});
 	} catch (error) {
 		console.error("Error submitting AI video job:", error);
 		return NextResponse.json(

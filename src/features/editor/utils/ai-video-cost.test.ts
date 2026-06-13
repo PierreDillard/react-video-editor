@@ -63,6 +63,10 @@ describe("ai-video model registry", () => {
 	it("uses PixVerse v4.5 as the default image-to-video model", () => {
 		expect(getModelsForMode("image-to-video")[0]?.id).toBe("pixverse-v4.5");
 	});
+
+	it("uses PixVerse v4.5 as the default text-to-video model", () => {
+		expect(getModelsForMode("text-to-video")[0]?.id).toBe("pixverse-v4.5");
+	});
 });
 
 describe("estimateCost", () => {

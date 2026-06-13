@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Loader2 } from "lucide-react";
 import { usePexelsImages } from "@/hooks/use-pexels-images";
 import { ImageLoading } from "@/components/ui/image-loading";
+import { IMAGES } from "../data/images";
 
 export const Images = () => {
   const isDraggingOverTimeline = useIsDraggingOverTimeline();
@@ -90,8 +91,8 @@ export const Images = () => {
     loadCuratedImages();
   };
 
-  // Use Pexels images if available, otherwise fall back to static images
-  const displayImages = pexelsImages;
+  // Use Pexels images if available, otherwise fall back to static images.
+  const displayImages = pexelsImages.length > 0 ? pexelsImages : IMAGES.filter(Boolean);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -154,7 +155,7 @@ export const Images = () => {
           </div>
           {pexelsLoading && <ImageLoading message="Searching for images..." />}
           {/* Pagination */}
-          {hasNextPage && (
+          {pexelsImages.length > 0 && hasNextPage && (
             <div className="flex items-center justify-center p-4">
               <Button
                 size="sm"

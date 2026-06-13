@@ -17,20 +17,30 @@ interface IAiVideoStore {
 	removeJob: (id: string) => void;
 }
 
+const isInlineMediaUrl = (url?: string) =>
+	!!url && (url.startsWith("data:") || url.startsWith("blob:"));
+
+const stripInlineMediaForPersistence = (job: AiVideoJob): AiVideoJob =>
+	isInlineMediaUrl(job.imageUrl) ? { ...job, imageUrl: undefined } : job;
+
 export const useAiVideoStore = create<IAiVideoStore>()(
 	persist(
 		(set) => ({
 			jobs: [],
 
 			submitJob: async ({ modelId, prompt, imageUrl, durationSec }) => {
-				const mode: AiVideoMode = imageUrl
-					? "image-to-video"
-					: "text-to-video";
+				const mode: AiVideoMode = imageUrl ? "image-to-video" : "text-to-video";
 
 				const response = await fetch("/api/ai-video", {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ modelId, mode, prompt, imageUrl, durationSec })
+					body: JSON.stringify({
+						modelId,
+						mode,
+						prompt,
+						imageUrl,
+						durationSec,
+					}),
 				});
 
 				if (!response.ok) {
@@ -38,7 +48,7 @@ export const useAiVideoStore = create<IAiVideoStore>()(
 					throw new Error(error?.message || "Failed to submit generation");
 				}
 
-				const { requestId } = await response.json();
+				const { requestId, statusUrl, responseUrl } = await response.json();
 
 				const job: AiVideoJob = {
 					id: requestId,
@@ -48,8 +58,10 @@ export const useAiVideoStore = create<IAiVideoStore>()(
 					imageUrl,
 					durationSec,
 					status: "pending",
+					statusUrl,
+					responseUrl,
 					cost: estimateCost(modelId, durationSec),
-					createdAt: Date.now()
+					createdAt: Date.now(),
 				};
 
 				set((state) => ({ jobs: [job, ...state.jobs] }));
@@ -58,15 +70,20 @@ export const useAiVideoStore = create<IAiVideoStore>()(
 			updateJob: (id, patch) =>
 				set((state) => ({
 					jobs: state.jobs.map((job) =>
-						job.id === id ? { ...job, ...patch } : job
-					)
+						job.id === id ? { ...job, ...patch } : job,
+					),
 				})),
 
 			removeJob: (id) =>
 				set((state) => ({
-					jobs: state.jobs.filter((job) => job.id !== id)
-				}))
+					jobs: state.jobs.filter((job) => job.id !== id),
+				})),
 		}),
-		{ name: "ai-video-jobs" }
-	)
+		{
+			name: "ai-video-jobs",
+			partialize: (state) => ({
+				jobs: state.jobs.map(stripInlineMediaForPersistence),
+			}),
+		},
+	),
 );

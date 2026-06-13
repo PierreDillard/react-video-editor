@@ -9,7 +9,7 @@ vi.hoisted(() => {
 		removeItem: (key: string) => storage.delete(key),
 		clear: () => storage.clear(),
 		key: () => null,
-		length: 0
+		length: 0,
 	};
 });
 
@@ -24,7 +24,11 @@ describe("useAiVideoStore", () => {
 	it("submitJob posts to the API and adds a pending job with estimated cost", async () => {
 		const fetchMock = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => ({ requestId: "req-1" })
+			json: async () => ({
+				requestId: "req-1",
+				statusUrl: "https://queue.fal.run/model/requests/req-1/status",
+				responseUrl: "https://queue.fal.run/model/requests/req-1/response",
+			}),
 		});
 		vi.stubGlobal("fetch", fetchMock);
 
@@ -32,12 +36,12 @@ describe("useAiVideoStore", () => {
 			modelId: "kling-2.1-standard",
 			prompt: "a cat",
 			imageUrl: "https://example.com/cat.png",
-			durationSec: 5
+			durationSec: 5,
 		});
 
 		expect(fetchMock).toHaveBeenCalledWith(
 			"/api/ai-video",
-			expect.objectContaining({ method: "POST" })
+			expect.objectContaining({ method: "POST" }),
 		);
 		const body = JSON.parse(fetchMock.mock.calls[0][1].body);
 		expect(body.mode).toBe("image-to-video");
@@ -45,23 +49,53 @@ describe("useAiVideoStore", () => {
 		const [job] = useAiVideoStore.getState().jobs;
 		expect(job.id).toBe("req-1");
 		expect(job.status).toBe("pending");
+		expect(job.statusUrl).toBe(
+			"https://queue.fal.run/model/requests/req-1/status",
+		);
+		expect(job.responseUrl).toBe(
+			"https://queue.fal.run/model/requests/req-1/response",
+		);
 		expect(job.cost).toBe(0.25);
 	});
 
 	it("submitJob uses text-to-video mode when no image is given", async () => {
 		const fetchMock = vi.fn().mockResolvedValue({
 			ok: true,
-			json: async () => ({ requestId: "req-2" })
+			json: async () => ({ requestId: "req-2" }),
 		});
 		vi.stubGlobal("fetch", fetchMock);
 
 		await useAiVideoStore.getState().submitJob({
 			modelId: "veo-3-fast",
 			prompt: "a dog",
-			durationSec: 8
+			durationSec: 8,
 		});
 
 		expect(useAiVideoStore.getState().jobs[0].mode).toBe("text-to-video");
+	});
+
+	it("keeps inline image previews in memory but strips them from persisted jobs", async () => {
+		const fetchMock = vi.fn().mockResolvedValue({
+			ok: true,
+			json: async () => ({ requestId: "req-inline" }),
+		});
+		vi.stubGlobal("fetch", fetchMock);
+
+		const imageUrl = "data:image/png;base64,large-inline-image";
+		await useAiVideoStore.getState().submitJob({
+			modelId: "kling-2.1-standard",
+			prompt: "a cat",
+			imageUrl,
+			durationSec: 5,
+		});
+
+		expect(useAiVideoStore.getState().jobs[0].imageUrl).toBe(imageUrl);
+
+		const persisted = JSON.parse(
+			globalThis.localStorage.getItem("ai-video-jobs") ?? "{}",
+		);
+		expect(persisted.state.jobs[0].imageUrl).toBeUndefined();
+		expect(JSON.stringify(persisted)).not.toContain("data:image");
 	});
 
 	it("submitJob throws the API error message and adds no job", async () => {
@@ -69,16 +103,16 @@ describe("useAiVideoStore", () => {
 			"fetch",
 			vi.fn().mockResolvedValue({
 				ok: false,
-				json: async () => ({ message: "FAL_KEY is not configured" })
-			})
+				json: async () => ({ message: "FAL_KEY is not configured" }),
+			}),
 		);
 
 		await expect(
 			useAiVideoStore.getState().submitJob({
 				modelId: "veo-3-fast",
 				prompt: "a dog",
-				durationSec: 8
-			})
+				durationSec: 8,
+			}),
 		).rejects.toThrow("FAL_KEY is not configured");
 		expect(useAiVideoStore.getState().jobs).toHaveLength(0);
 	});
@@ -88,22 +122,22 @@ describe("useAiVideoStore", () => {
 			"fetch",
 			vi.fn().mockResolvedValue({
 				ok: true,
-				json: async () => ({ requestId: "req-3" })
-			})
+				json: async () => ({ requestId: "req-3" }),
+			}),
 		);
 		await useAiVideoStore.getState().submitJob({
 			modelId: "veo-3-fast",
 			prompt: "a dog",
-			durationSec: 8
+			durationSec: 8,
 		});
 
 		useAiVideoStore.getState().updateJob("req-3", {
 			status: "completed",
-			videoUrl: "https://example.com/out.mp4"
+			videoUrl: "https://example.com/out.mp4",
 		});
 		expect(useAiVideoStore.getState().jobs[0]).toMatchObject({
 			status: "completed",
-			videoUrl: "https://example.com/out.mp4"
+			videoUrl: "https://example.com/out.mp4",
 		});
 
 		useAiVideoStore.getState().removeJob("req-3");

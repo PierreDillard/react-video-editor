@@ -11,6 +11,8 @@ export interface AiVideoJob {
 	durationSec: number;
 	status: AiVideoJobStatus;
 	videoUrl?: string;
+	statusUrl?: string;
+	responseUrl?: string;
 	error?: string;
 	cost: number;
 	createdAt: number;
